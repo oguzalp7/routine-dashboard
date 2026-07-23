@@ -175,24 +175,35 @@
             outline: 2px solid var(--accent-blue);
         }
 
-        .delete-btn {
+        .card-actions {
             position: absolute;
             top: 6px;
             right: 6px;
-            background: transparent;
+            display: none;
+            gap: 4px;
+        }
+
+        .routine-card:hover .card-actions {
+            display: flex;
+        }
+
+        .icon-btn {
+            background: rgba(0,0,0,0.3);
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            font-size: 0.8rem;
-            display: none;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
         }
 
-        .routine-card:hover .delete-btn {
-            display: block;
+        .icon-btn:hover {
+            color: white;
+            background: var(--accent-blue);
         }
 
-        .delete-btn:hover {
-            color: var(--accent-red);
+        .icon-btn.delete:hover {
+            background: var(--accent-red);
         }
 
         .routine-time {
@@ -253,6 +264,48 @@
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
+        }
+
+        /* Excel-Style Table View */
+        .excel-table-container {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .excel-table th, .excel-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .excel-table th {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .excel-table input, .excel-table select {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            padding: 4px;
+        }
+
+        .excel-table input:focus, .excel-table select:focus {
+            outline: 1px solid var(--accent-blue);
+            background: var(--bg-primary);
+            border-radius: 4px;
         }
 
         /* Modal Form */
@@ -344,6 +397,7 @@
             <button class="action-btn primary" onclick="openModal()">➕ Yeni Rutin Ekle</button>
             <button class="view-btn active" id="btnWeekly" onclick="switchView('weekly')">📅 Haftalık Görünüm</button>
             <button class="view-btn" id="btnDaily" onclick="switchView('daily')">⏱️ Günlük Saatlik Görünüm</button>
+            <button class="view-btn" id="btnTable" onclick="switchView('table')">📊 Tablo & Toplu Düzenleme</button>
 
             <div class="live-status">
                 <div class="pulse-dot"></div>
@@ -358,13 +412,35 @@
     <!-- Daily Hourly View Container -->
     <div class="hourly-container" id="dailyView" style="display: none;"></div>
 
-    <!-- Add Routine Modal -->
-    <div class="modal" id="addModal">
+    <!-- Excel Table View Container -->
+    <div class="excel-table-container" id="tableView" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="font-size: 1rem; color: var(--accent-blue);">📊 Excel-Style Editable Routine Table</h3>
+            <button class="action-btn primary" onclick="saveTableChanges()">💾 Tüm Değişiklikleri Kaydet</button>
+        </div>
+        <table class="excel-table">
+            <thead>
+                <tr>
+                    <th>Rutin Adı</th>
+                    <th>Başlangıç</th>
+                    <th>Bitiş</th>
+                    <th>Renk</th>
+                    <th>Açıklama</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Add/Edit Routine Modal -->
+    <div class="modal" id="routineModal">
         <div class="modal-content">
-            <h3>➕ Yeni Rutin Ekle</h3>
+            <h3 id="modalTitle">➕ Yeni Rutin Ekle</h3>
+            <input type="hidden" id="editIndex" value="-1">
             <div class="form-group">
                 <label>Rutin Adı</label>
-                <input type="text" id="inputName" placeholder="Örn: Exercise & Gym">
+                <input type="text" id="inputName" placeholder="Örn: Sport & Gym">
             </div>
             <div style="display: flex; gap: 12px;">
                 <div class="form-group" style="flex: 1;">
@@ -378,7 +454,7 @@
             </div>
             <div class="form-group">
                 <label>Aktif Günler</label>
-                <div class="days-checkboxes">
+                <div class="days-checkboxes" id="daysCheckboxes">
                     <label><input type="checkbox" value="Monday" checked> Mon</label>
                     <label><input type="checkbox" value="Tuesday" checked> Tue</label>
                     <label><input type="checkbox" value="Wednesday" checked> Wed</label>
@@ -392,7 +468,7 @@
                 <label>Renk</label>
                 <select id="inputColor">
                     <option value="blue">Mavi (Blue)</option>
-                    <option value="orange" selected>Turuncu (Orange)</option>
+                    <option value="orange">Turuncu (Orange)</option>
                     <option value="green">Yeşil (Green)</option>
                     <option value="purple">Mor (Purple)</option>
                     <option value="red">Kırmızı (Red)</option>
@@ -400,12 +476,12 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Açıklama</label>
-                <textarea id="inputDesc" rows="2" placeholder="Yapay zeka için görev yönlendirme notu..."></textarea>
+                <label>Açıklama (Yönlendırma Notu)</label>
+                <textarea id="inputDesc" rows="3" placeholder="Fitness, workout, gym session and health routine instructions..."></textarea>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
                 <button class="action-btn" onclick="closeModal()">İptal</button>
-                <button class="action-btn primary" onclick="saveNewRoutine()">Kaydet & Ekle</button>
+                <button class="action-btn primary" onclick="saveRoutineModal()">Kaydet & Güncelle</button>
             </div>
         </div>
     </div>
@@ -415,7 +491,7 @@
     </footer>
 
     <script>
-        // Live Routines Data (Includes Chores added by User in Notion)
+        // Live Routines Data (Includes Sports & Gym entry)
         let routines = [
             {
                 name: "Deep Work Session",
@@ -432,6 +508,14 @@
                 endTime: "14:00",
                 color: "orange",
                 description: "Home Cleaning, Food Prep, Shop for groceries, etc…"
+            },
+            {
+                name: "Sport & Gym",
+                days: ["Monday", "Wednesday", "Friday"],
+                startTime: "08:00",
+                endTime: "09:30",
+                color: "red",
+                description: "Fitness, strength training, workout session & health routine."
             },
             {
                 name: "Trading & Market Analysis",
@@ -454,24 +538,58 @@
         const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         let currentView = 'weekly';
 
-        function openModal() { document.getElementById('addModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+        function openModal() {
+            document.getElementById('editIndex').value = "-1";
+            document.getElementById('modalTitle').innerText = "➕ Yeni Rutin Ekle";
+            document.getElementById('inputName').value = "";
+            document.getElementById('inputStart').value = "";
+            document.getElementById('inputEnd').value = "";
+            document.getElementById('inputDesc').value = "";
+            document.getElementById('routineModal').style.display = 'flex';
+        }
 
-        function saveNewRoutine() {
+        function openEditModal(index) {
+            const r = routines[index];
+            document.getElementById('editIndex').value = index;
+            document.getElementById('modalTitle').innerText = `✏️ Rutini Düzenle: ${r.name}`;
+            document.getElementById('inputName').value = r.name;
+            document.getElementById('inputStart').value = r.startTime;
+            document.getElementById('inputEnd').value = r.endTime;
+            document.getElementById('inputColor').value = r.color.toLowerCase();
+            document.getElementById('inputDesc').value = r.description || "";
+
+            // Check checkboxes
+            document.querySelectorAll('#daysCheckboxes input').forEach(cb => {
+                cb.checked = r.days.includes(cb.value);
+            });
+
+            document.getElementById('routineModal').style.display = 'flex';
+        }
+
+        function closeModal() { document.getElementById('routineModal').style.display = 'none'; }
+
+        function saveRoutineModal() {
+            const index = parseInt(document.getElementById('editIndex').value);
             const name = document.getElementById('inputName').value.trim();
             const startTime = document.getElementById('inputStart').value.trim();
             const endTime = document.getElementById('inputEnd').value.trim();
             const color = document.getElementById('inputColor').value;
             const description = document.getElementById('inputDesc').value.trim();
-
-            const checkedDays = Array.from(document.querySelectorAll('.days-checkboxes input:checked')).map(c => c.value);
+            const checkedDays = Array.from(document.querySelectorAll('#daysCheckboxes input:checked')).map(c => c.value);
 
             if (!name || !startTime || !endTime) {
                 alert('Lütfen Rutin Adı, Başlangıç ve Bitiş saatini doldurun!');
                 return;
             }
 
-            routines.push({ name, days: checkedDays, startTime, endTime, color, description });
+            const routineObj = { name, days: checkedDays, startTime, endTime, color, description };
+
+            if (index >= 0) {
+                routines[index] = routineObj;
+            } else {
+                routines.push(routineObj);
+            }
+
             closeModal();
             renderDashboard();
         }
@@ -487,9 +605,11 @@
             currentView = view;
             document.getElementById('btnWeekly').classList.toggle('active', view === 'weekly');
             document.getElementById('btnDaily').classList.toggle('active', view === 'daily');
+            document.getElementById('btnTable').classList.toggle('active', view === 'table');
 
             document.getElementById('weeklyView').style.display = view === 'weekly' ? 'grid' : 'none';
             document.getElementById('dailyView').style.display = view === 'daily' ? 'flex' : 'none';
+            document.getElementById('tableView').style.display = view === 'table' ? 'block' : 'none';
 
             renderDashboard();
         }
@@ -543,10 +663,13 @@
                         }
 
                         card.innerHTML = `
-                            <button class="delete-btn" onclick="deleteRoutine(${rIndex})">✕</button>
+                            <div class="card-actions">
+                                <button class="icon-btn" onclick="openEditModal(${rIndex})">✏️</button>
+                                <button class="icon-btn delete" onclick="deleteRoutine(${rIndex})">✕</button>
+                            </div>
                             <div class="routine-time">⏱️ ${r.startTime} - ${r.endTime}</div>
                             <div class="routine-title">${r.name}</div>
-                            <div class="routine-desc">${r.description}</div>
+                            <div class="routine-desc">${r.description || '<em style="opacity:0.6;">Açıklama yok (Düzenle)</em>'}</div>
                         `;
                         dayCol.appendChild(card);
                     });
@@ -568,7 +691,7 @@
                 const row = document.createElement('div');
                 row.className = `hour-row ${currentHours === hour ? 'active-hour' : ''}`;
 
-                const timeLabel = document.label = document.createElement('div');
+                const timeLabel = document.createElement('div');
                 timeLabel.className = 'hour-time';
                 timeLabel.innerText = hourStr;
                 row.appendChild(timeLabel);
@@ -605,6 +728,32 @@
                 dailyContainer.appendChild(row);
             }
 
+            // Render Excel Table View
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            routines.forEach((r, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" value="${r.name}" onchange="routines[${idx}].name = this.value"></td>
+                    <td><input type="text" value="${r.startTime}" style="width:70px;" onchange="routines[${idx}].startTime = this.value"></td>
+                    <td><input type="text" value="${r.endTime}" style="width:70px;" onchange="routines[${idx}].endTime = this.value"></td>
+                    <td>
+                        <select onchange="routines[${idx}].color = this.value">
+                            <option value="blue" ${r.color==='blue'?'selected':''}>Blue</option>
+                            <option value="orange" ${r.color==='orange'?'selected':''}>Orange</option>
+                            <option value="red" ${r.color==='red'?'selected':''}>Red</option>
+                            <option value="green" ${r.color==='green'?'selected':''}>Green</option>
+                            <option value="purple" ${r.color==='purple'?'selected':''}>Purple</option>
+                        </select>
+                    </td>
+                    <td><input type="text" value="${r.description || ''}" placeholder="Açıklama ekle..." onchange="routines[${idx}].description = this.value"></td>
+                    <td>
+                        <button class="icon-btn delete" onclick="deleteRoutine(${idx})">✕ Sil</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
             // Update Header Live Status
             const statusText = document.getElementById('currentStatusText');
             if (activeSlotFound) {
@@ -612,6 +761,11 @@
             } else {
                 statusText.innerText = `Current Time: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} (Serbest Zaman)`;
             }
+        }
+
+        function saveTableChanges() {
+            alert('Tüm tablo değişiklikleri kaydedildi!');
+            renderDashboard();
         }
 
         renderDashboard();
