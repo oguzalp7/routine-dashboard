@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Recurring Routine Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --accent-purple: #a855f7;
+            --accent-red: #ef4444;
+            --accent-orange: #f97316;
+            --border-color: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .title-group h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title-group p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .live-status {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .day-column {
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .day-column.today {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .day-header {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .today .day-header {
+            color: var(--accent-blue);
+        }
+
+        .routine-card {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-blue);
+            padding: 12px;
+            border-radius: 8px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .routine-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .routine-card.active-now {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: var(--accent-blue);
+            outline: 2px solid var(--accent-blue);
+        }
+
+        .routine-time {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .routine-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .routine-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        .badge-blue { border-left-color: var(--accent-blue); }
+        .badge-green { border-left-color: var(--accent-green); }
+        .badge-purple { border-left-color: var(--accent-purple); }
+        .badge-red { border-left-color: var(--accent-red); }
+        .badge-orange { border-left-color: var(--accent-orange); }
+
+        footer {
+            margin-top: 24px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="title-group">
+            <h1>🗓️ Recurring Routine Dashboard</h1>
+            <p>Ozi’s HQ/OS — Module #1 Dynamic Routines Engine</p>
+        </div>
+        <div class="live-status" id="liveStatus">
+            <div class="pulse-dot"></div>
+            <span id="currentStatusText">Active Slot: Checking...</span>
+        </div>
+    </header>
+
+    <div class="grid-container" id="scheduleGrid">
+        <!-- Generated by JavaScript -->
+    </div>
+
+    <footer>
+        Synced with Notion Database • Supports Mobile & Desktop Native Push Notifications
+    </footer>
+
+    <script>
+        const routines = [
+            {
+                name: "Deep Work Session",
+                days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                startTime: "11:30",
+                endTime: "15:00",
+                color: "blue",
+                description: "Existing projects, job interview preps, architecture & coding."
+            },
+            {
+                name: "Trading & Market Analysis",
+                days: ["Tuesday", "Wednesday", "Thursday", "Friday"],
+                startTime: "15:30",
+                endTime: "17:00",
+                color: "green",
+                description: "Financial market research & trading execution (Mondays excluded)."
+            },
+            {
+                name: "Rest & Skill Learning",
+                days: ["Saturday", "Sunday"],
+                startTime: "18:00",
+                endTime: "20:00",
+                color: "purple",
+                description: "Personal time, skill learning, technical reading & recharge."
+            }
+        ];
+
+        const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+        function renderGrid() {
+            const container = document.getElementById('scheduleGrid');
+            container.innerHTML = '';
+
+            const now = new Date();
+            const currentDayIndex = (now.getDay() + 6) % 7; // Monday = 0
+            const todayName = daysOfWeek[currentDayIndex];
+            const currentHours = now.getHours();
+            const currentMinutes = now.getMinutes();
+            const currentTimeVal = currentHours * 60 + currentMinutes;
+
+            let activeSlotFound = null;
+
+            daysOfWeek.forEach((day, index) => {
+                const dayCol = document.createElement('div');
+                dayCol.className = `day-column ${day === todayName ? 'today' : ''}`;
+
+                const header = document.createElement('div');
+                header.className = 'day-header';
+                header.innerHTML = `<span>${day}</span>${day === todayName ? '<span>(Today)</span>' : ''}`;
+                dayCol.appendChild(header);
+
+                const dayRoutines = routines.filter(r => r.days.includes(day));
+
+                if (dayRoutines.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.style.color = 'var(--text-secondary)';
+                    empty.style.fontSize = '0.8rem';
+                    empty.style.padding = '12px 0';
+                    empty.innerText = 'No fixed routines';
+                    dayCol.appendChild(empty);
+                } else {
+                    dayRoutines.sort((a,b) => a.startTime.localeCompare(b.startTime)).forEach(r => {
+                        const card = document.createElement('div');
+                        card.className = `routine-card badge-${r.color}`;
+
+                        const [startH, startM] = r.startTime.split(':').map(Number);
+                        const [endH, endM] = r.endTime.split(':').map(Number);
+                        const startVal = startH * 60 + startM;
+                        const endVal = endH * 60 + endM;
+
+                        if (day === todayName && currentTimeVal >= startVal && currentTimeVal <= endVal) {
+                            card.classList.add('active-now');
+                            activeSlotFound = `${r.name} (${r.startTime} - ${r.endTime})`;
+                        }
+
+                        card.innerHTML = `
+                            <div class="routine-time">⏱️ ${r.startTime} - ${r.endTime}</div>
+                            <div class="routine-title">${r.name}</div>
+                            <div class="routine-desc">${r.description}</div>
+                        `;
+                        dayCol.appendChild(card);
+                    });
+                }
+
+                container.appendChild(dayCol);
+            });
+
+            const statusText = document.getElementById('currentStatusText');
+            if (activeSlotFound) {
+                statusText.innerText = `Active Now: ${activeSlotFound}`;
+            } else {
+                statusText.innerText = `Current Time: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} (Free Window)`;
+            }
+        }
+
+        renderGrid();
+        setInterval(renderGrid, 30000);
+    </script>
+</body>
+</html>
