@@ -324,7 +324,7 @@
     </footer>
 
     <script>
-        let inboxItems = [
+        const defaultInboxItems = [
             {
                 title: "Refactor authentication module to support JWT tokens",
                 category: "Software Project 💻",
@@ -350,6 +350,21 @@
                 description: "Low stock (3 pods remaining). Add to weekly grocery shopping list."
             }
         ];
+
+        // Persistent LocalStorage Engine
+        let inboxItems = [];
+        try {
+            const saved = localStorage.getItem('hq_m2_inbox');
+            inboxItems = saved ? JSON.parse(saved) : defaultInboxItems;
+        } catch(e) {
+            inboxItems = defaultInboxItems;
+        }
+
+        function saveInboxToStorage() {
+            try {
+                localStorage.setItem('hq_m2_inbox', JSON.stringify(inboxItems));
+            } catch(e) { console.error('LocalStorage error:', e); }
+        }
 
         function closeModal() { document.getElementById('inboxModal').style.display = 'none'; }
         
@@ -388,6 +403,7 @@
             if (index >= 0) { inboxItems[index] = obj; }
             else { inboxItems.push(obj); }
 
+            saveInboxToStorage();
             closeModal();
             renderInboxTable();
         }
@@ -395,6 +411,7 @@
         function deleteInboxItem(index) {
             if (confirm(`'${inboxItems[index].title}' görevini silmek istiyor musunuz?`)) {
                 inboxItems.splice(index, 1);
+                saveInboxToStorage();
                 renderInboxTable();
             }
         }

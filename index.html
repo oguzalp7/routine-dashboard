@@ -483,49 +483,28 @@
     </footer>
 
     <script>
-        // Module 1 Routines Data
-        let routines = [
-            {
-                name: "Deep Work Session",
-                days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-                startTime: "11:30",
-                endTime: "15:00",
-                color: "blue",
-                description: "Existing projects, job interview preps, architecture & coding."
-            },
-            {
-                name: "Chores",
-                days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-                startTime: "11:30",
-                endTime: "14:00",
-                color: "orange",
-                description: "Home Cleaning, Food Prep, Shop for groceries, etc…"
-            },
-            {
-                name: "Sport & Gym",
-                days: ["Monday", "Wednesday", "Friday"],
-                startTime: "08:00",
-                endTime: "09:30",
-                color: "red",
-                description: "Fitness, strength workout & health routine."
-            },
-            {
-                name: "Trading & Market Analysis",
-                days: ["Tuesday", "Wednesday", "Thursday", "Friday"],
-                startTime: "15:30",
-                endTime: "17:00",
-                color: "green",
-                description: "Financial market research & trading execution (Mondays excluded)."
-            },
-            {
-                name: "Rest & Skill Learning",
-                days: ["Saturday", "Sunday"],
-                startTime: "18:00",
-                endTime: "20:00",
-                color: "purple",
-                description: "Personal time, skill learning, technical reading & recharge."
-            }
+        const defaultRoutines = [
+            { name: "Deep Work Session", days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], startTime: "11:30", endTime: "15:00", color: "blue", description: "Existing projects, job interview preps, architecture & coding." },
+            { name: "Chores", days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], startTime: "11:30", endTime: "14:00", color: "orange", description: "Home Cleaning, Food Prep, Shop for groceries, etc…" },
+            { name: "Sport & Gym", days: ["Monday", "Wednesday", "Friday"], startTime: "08:00", endTime: "09:30", color: "red", description: "Fitness, strength workout & health routine." },
+            { name: "Trading & Market Analysis", days: ["Tuesday", "Wednesday", "Thursday", "Friday"], startTime: "15:30", endTime: "17:00", color: "green", description: "Financial market research & trading execution (Mondays excluded)." },
+            { name: "Rest & Skill Learning", days: ["Saturday", "Sunday"], startTime: "18:00", endTime: "20:00", color: "purple", description: "Personal time, skill learning, technical reading & recharge." }
         ];
+
+        // Persistent LocalStorage Engine
+        let routines = [];
+        try {
+            const saved = localStorage.getItem('hq_m1_routines');
+            routines = saved ? JSON.parse(saved) : defaultRoutines;
+        } catch (e) {
+            routines = defaultRoutines;
+        }
+
+        function saveRoutinesToStorage() {
+            try {
+                localStorage.setItem('hq_m1_routines', JSON.stringify(routines));
+            } catch(e) { console.error('LocalStorage error:', e); }
+        }
 
         const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         let currentView = 'weekly';
@@ -575,12 +554,10 @@
 
             const routineObj = { name, days: checkedDays, startTime, endTime, color, description };
 
-            if (index >= 0) {
-                routines[index] = routineObj;
-            } else {
-                routines.push(routineObj);
-            }
+            if (index >= 0) { routines[index] = routineObj; }
+            else { routines.push(routineObj); }
 
+            saveRoutinesToStorage();
             closeModal();
             renderDashboard();
         }
@@ -588,6 +565,7 @@
         function deleteRoutine(index) {
             if (confirm(`'${routines[index].name}' rutinini silmek istediğinize emin misiniz?`)) {
                 routines.splice(index, 1);
+                saveRoutinesToStorage();
                 renderDashboard();
             }
         }
@@ -607,7 +585,7 @@
 
         function renderDashboard() {
             const now = new Date();
-            const currentDayIndex = (now.getDay() + 6) % 7; // Monday = 0
+            const currentDayIndex = (now.getDay() + 6) % 7;
             const todayName = daysOfWeek[currentDayIndex];
             const currentHours = now.getHours();
             const currentMinutes = now.getMinutes();
@@ -725,11 +703,11 @@
             routines.forEach((r, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><input type="text" value="${r.name}" onchange="routines[${idx}].name = this.value"></td>
-                    <td><input type="text" value="${r.startTime}" style="width:70px;" onchange="routines[${idx}].startTime = this.value"></td>
-                    <td><input type="text" value="${r.endTime}" style="width:70px;" onchange="routines[${idx}].endTime = this.value"></td>
+                    <td><input type="text" value="${r.name}" onchange="routines[${idx}].name = this.value; saveRoutinesToStorage();"></td>
+                    <td><input type="text" value="${r.startTime}" style="width:70px;" onchange="routines[${idx}].startTime = this.value; saveRoutinesToStorage();"></td>
+                    <td><input type="text" value="${r.endTime}" style="width:70px;" onchange="routines[${idx}].endTime = this.value; saveRoutinesToStorage();"></td>
                     <td>
-                        <select onchange="routines[${idx}].color = this.value">
+                        <select onchange="routines[${idx}].color = this.value; saveRoutinesToStorage();">
                             <option value="blue" ${r.color==='blue'?'selected':''}>Blue</option>
                             <option value="orange" ${r.color==='orange'?'selected':''}>Orange</option>
                             <option value="red" ${r.color==='red'?'selected':''}>Red</option>
@@ -737,7 +715,7 @@
                             <option value="purple" ${r.color==='purple'?'selected':''}>Purple</option>
                         </select>
                     </td>
-                    <td><input type="text" value="${r.description || ''}" placeholder="Açıklama ekle..." onchange="routines[${idx}].description = this.value"></td>
+                    <td><input type="text" value="${r.description || ''}" placeholder="Açıklama ekle..." onchange="routines[${idx}].description = this.value; saveRoutinesToStorage();"></td>
                     <td>
                         <button class="icon-btn delete" onclick="deleteRoutine(${idx})">✕ Sil</button>
                     </td>
@@ -745,7 +723,6 @@
                 tbody.appendChild(tr);
             });
 
-            // Update Header Live Status
             const statusText = document.getElementById('currentStatusText');
             if (activeSlotFound) {
                 statusText.innerText = `Active Now: ${activeSlotFound}`;
@@ -755,7 +732,8 @@
         }
 
         function saveTableChanges() {
-            alert('Tüm tablo değişiklikleri kaydedildi!');
+            saveRoutinesToStorage();
+            alert('Tüm tablo değişiklikleri kalıcı olarak kaydedildi!');
             renderDashboard();
         }
 
