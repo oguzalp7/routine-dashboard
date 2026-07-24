@@ -1,0 +1,29 @@
+[
+  {
+    "id": "3a7a5200-bb63-81c5-a4eb-facaf22d20c9",
+    "title": "Dishwasher Detergent Pods & Grocery Restock",
+    "category": "Home & Chores 🏠",
+    "priority": "⚡ Medium",
+    "status": "Approved",
+    "targetRoutine": "Chores",
+    "description": "Low stock (3 pods remaining). Add to weekly grocery shopping list."
+  },
+  {
+    "id": "3a7a5200-bb63-8157-b213-d937a79d2dde",
+    "title": "Chest & Triceps workout session",
+    "category": "Fitness & Health 🏋️",
+    "priority": "🔥 High",
+    "status": "Approved",
+    "targetRoutine": "Sport & Gym",
+    "description": "Targeted for GYM Slot (08:00 - 09:30). Bench Press 4x10, Dips 3x12."
+  },
+  {
+    "id": "3a7a5200-bb63-81cc-9f89-d59f36a40cf7",
+    "title": "Refactor authentication module to support JWT tokens",
+    "category": "Software Project 💻",
+    "priority": "🔥 High",
+    "status": "1. Proposal",
+    "targetRoutine": "Deep Work Session",
+    "description": "Targeted for Deep Work Session (11:30 - 15:00). Awaiting user approval."
+  }
+]

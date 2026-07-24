@@ -1,0 +1,45 @@
+[
+  {
+    "id": "3a5a5200-bb63-8185-98ca-fbdcd58fab09",
+    "name": "Rest & Skill Learning",
+    "days": [
+      "Saturday",
+      "Sunday"
+    ],
+    "startTime": "18:00",
+    "endTime": "20:00",
+    "color": "purple",
+    "description": "Personal time, skill learning, technical reading & recharge."
+  },
+  {
+    "id": "3a5a5200-bb63-81c9-b279-d452a8c55459",
+    "name": "Trading & Market Analysis",
+    "days": [
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "startTime": "15:30",
+    "endTime": "17:00",
+    "color": "green",
+    "description": "Financial market research & trading execution (Mondays excluded)."
+  },
+  {
+    "id": "3a6a5200-bb63-80f0-87bee5624977bc5f",
+    "name": "Chores",
+    "days": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "startTime": "11:30",
+    "endTime": "14:00",
+    "color": "orange",
+    "description": "Home Cleaning, Food Prep, Shop for groceries, etc…"
+  }
+]

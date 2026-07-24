@@ -140,6 +140,7 @@
 
         .pill-proposal { background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); border: 1px solid var(--accent-purple); }
         .pill-approved { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+        .pill-progress { background: rgba(234, 179, 8, 0.2); color: var(--accent-yellow); border: 1px solid var(--accent-yellow); }
 
         .icon-btn {
             background: rgba(0,0,0,0.3);
@@ -210,7 +211,7 @@
     <header>
         <div class="title-group">
             <h1>📥 Module #2: Smart Inbox & Router Engine</h1>
-            <p>Ozi’s HQ/OS — Relational Task Router (Linked to Module #1 Routines)</p>
+            <p>Ozi’s HQ/OS — Relational Task Router (Synced with Live Notion Database)</p>
         </div>
 
         <div class="controls">
@@ -239,11 +240,6 @@
 
         <select id="filterRoutine" onchange="renderInboxTable()">
             <option value="ALL">Tüm Rutin Zaman Dilimleri</option>
-            <option value="Deep Work Session">Deep Work Session (11:30 - 15:00)</option>
-            <option value="Chores">Chores Block (11:30 - 14:00)</option>
-            <option value="Sport & Gym">Sport & Gym (08:00 - 09:30)</option>
-            <option value="Trading & Market Analysis">Trading (15:30 - 17:00)</option>
-            <option value="Rest & Skill Learning">Rest & Skill (18:00 - 20:00)</option>
         </select>
 
         <select id="sortOrder" onchange="renderInboxTable()">
@@ -259,7 +255,7 @@
                 <tr>
                     <th>Görev / Fikir Adı</th>
                     <th>Kategori (Domain)</th>
-                    <th>Hedef Rutin Dilimi (Module #1 Bağlantısı)</th>
+                    <th>Hedef Rutin Dilimi (Notion Relation Link)</th>
                     <th>Öncelik</th>
                     <th>Statü</th>
                     <th>Açıklama / AI Bağlamı</th>
@@ -299,14 +295,8 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>Hedef Rutin Dilimi (Module #1 İlişkisi)</label>
-                <select id="iInputRoutineSlot">
-                    <option value="Deep Work Session">💻 Deep Work Session (11:30 - 15:00)</option>
-                    <option value="Chores">🏠 Chores Block (11:30 - 14:00)</option>
-                    <option value="Sport & Gym">🏋️ Sport & Gym (08:00 - 09:30)</option>
-                    <option value="Trading & Market Analysis">📈 Trading (15:30 - 17:00)</option>
-                    <option value="Rest & Skill Learning">☕ Rest & Skill (18:00 - 20:00)</option>
-                </select>
+                <label>Hedef Rutin Dilimi (Modül #1 Veritabanı İlişkisi)</label>
+                <select id="iInputRoutineSlot"></select>
             </div>
             <div class="form-group">
                 <label>Açıklama / AI Yönlendirme Notu</label>
@@ -320,50 +310,59 @@
     </div>
 
     <footer>
-        Synced Live with Notion HQ/OS • Module #2 Smart Router Engine
+        Synced Live with Notion DB (ID: 3a7a5200-bb63-812e-9921-dc7cc6601166) • Module #2 Router Engine
     </footer>
 
     <script>
-        const defaultInboxItems = [
-            {
-                title: "Refactor authentication module to support JWT tokens",
-                category: "Software Project 💻",
-                targetRoutine: "Deep Work Session",
-                priority: "🔥 High",
-                status: "1. Proposal",
-                description: "Targeted for Deep Work Session (11:30 - 15:00). Awaiting user approval."
-            },
-            {
-                title: "Chest & Triceps workout session",
-                category: "Fitness & Health 🏋️",
-                targetRoutine: "Sport & Gym",
-                priority: "🔥 High",
-                status: "Approved",
-                description: "Targeted for GYM Slot (08:00 - 09:30). Bench Press 4x10, Dips 3x12."
-            },
-            {
-                title: "Dishwasher Detergent Pods & Grocery Restock",
-                category: "Home & Chores 🏠",
-                targetRoutine: "Chores",
-                priority: "⚡ Medium",
-                status: "Approved",
-                description: "Low stock (3 pods remaining). Add to weekly grocery shopping list."
-            }
+        let routinesData = [
+            { name: "Chores" },
+            { name: "Rest & Skill Learning" },
+            { name: "Trading & Market Analysis" },
+            { name: "Deep Work Session" },
+            { name: "Sport & Gym" }
         ];
 
-        // Persistent LocalStorage Engine
         let inboxItems = [];
-        try {
-            const saved = localStorage.getItem('hq_m2_inbox');
-            inboxItems = saved ? JSON.parse(saved) : defaultInboxItems;
-        } catch(e) {
-            inboxItems = defaultInboxItems;
+
+        async function initLiveNotionData() {
+            try {
+                const rResp = await fetch('routines.json');
+                if (rResp.ok) {
+                    routinesData = await rResp.json();
+                }
+            } catch(e) { console.log('Using default routine list'); }
+
+            try {
+                const iResp = await fetch('inbox.json');
+                if (iResp.ok) {
+                    inboxItems = await iResp.json();
+                }
+            } catch(e) {
+                console.log('Using local fallback inbox');
+            }
+
+            populateRoutineDropdowns();
+            renderInboxTable();
         }
 
-        function saveInboxToStorage() {
-            try {
-                localStorage.setItem('hq_m2_inbox', JSON.stringify(inboxItems));
-            } catch(e) { console.error('LocalStorage error:', e); }
+        function populateRoutineDropdowns() {
+            const filterSelect = document.getElementById('filterRoutine');
+            const modalSelect = document.getElementById('iInputRoutineSlot');
+
+            filterSelect.innerHTML = '<option value="ALL">Tüm Rutin Zaman Dilimleri</option>';
+            modalSelect.innerHTML = '';
+
+            routinesData.forEach(r => {
+                const opt1 = document.createElement('option');
+                opt1.value = r.name;
+                opt1.innerText = r.name;
+                filterSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = r.name;
+                opt2.innerText = r.name;
+                modalSelect.appendChild(opt2);
+            });
         }
 
         function closeModal() { document.getElementById('inboxModal').style.display = 'none'; }
@@ -403,7 +402,6 @@
             if (index >= 0) { inboxItems[index] = obj; }
             else { inboxItems.push(obj); }
 
-            saveInboxToStorage();
             closeModal();
             renderInboxTable();
         }
@@ -411,7 +409,6 @@
         function deleteInboxItem(index) {
             if (confirm(`'${inboxItems[index].title}' görevini silmek istiyor musunuz?`)) {
                 inboxItems.splice(index, 1);
-                saveInboxToStorage();
                 renderInboxTable();
             }
         }
@@ -444,7 +441,7 @@
                 const tr = document.createElement('tr');
 
                 let prioClass = item.priority.includes('High') ? 'pill-high' : (item.priority.includes('Medium') ? 'pill-med' : 'pill-low');
-                let statusClass = item.status.includes('Proposal') ? 'pill-proposal' : 'pill-approved';
+                let statusClass = item.status.includes('Proposal') ? 'pill-proposal' : (item.status.includes('Progress') ? 'pill-progress' : 'pill-approved');
 
                 tr.innerHTML = `
                     <td><strong>${item.title}</strong></td>
@@ -462,7 +459,7 @@
             });
         }
 
-        renderInboxTable();
+        initLiveNotionData();
     </script>
 </body>
 </html>
