@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Recurring Routine Dashboard</title>
+    <title>Module #1: Dynamic Recurring Routine Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -302,12 +302,6 @@
             padding: 4px;
         }
 
-        .excel-table input:focus, .excel-table select:focus {
-            outline: 1px solid var(--accent-blue);
-            background: var(--bg-primary);
-            border-radius: 4px;
-        }
-
         /* Modal Form */
         .modal {
             display: none;
@@ -375,7 +369,6 @@
         .badge-purple { border-left-color: var(--accent-purple); }
         .badge-red { border-left-color: var(--accent-red); }
         .badge-orange { border-left-color: var(--accent-orange); }
-        .badge-yellow { border-left-color: var(--accent-yellow); }
 
         footer {
             margin-top: 20px;
@@ -397,7 +390,7 @@
             <button class="action-btn primary" onclick="openModal()">➕ Yeni Rutin Ekle</button>
             <button class="view-btn active" id="btnWeekly" onclick="switchView('weekly')">📅 Haftalık Görünüm</button>
             <button class="view-btn" id="btnDaily" onclick="switchView('daily')">⏱️ Günlük Saatlik Görünüm</button>
-            <button class="view-btn" id="btnTable" onclick="switchView('table')">📊 Tablo & Toplu Düzenleme</button>
+            <button class="view-btn" id="btnTable" onclick="switchView('table')">📊 Tablo Görünümü</button>
 
             <div class="live-status">
                 <div class="pulse-dot"></div>
@@ -472,12 +465,11 @@
                     <option value="green">Yeşil (Green)</option>
                     <option value="purple">Mor (Purple)</option>
                     <option value="red">Kırmızı (Red)</option>
-                    <option value="yellow">Sarı (Yellow)</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>Açıklama (Yönlendırma Notu)</label>
-                <textarea id="inputDesc" rows="3" placeholder="Fitness, workout, gym session and health routine instructions..."></textarea>
+                <label>Açıklama</label>
+                <textarea id="inputDesc" rows="2"></textarea>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;">
                 <button class="action-btn" onclick="closeModal()">İptal</button>
@@ -491,7 +483,7 @@
     </footer>
 
     <script>
-        // Live Routines Data (Includes Sports & Gym entry)
+        // Module 1 Routines Data
         let routines = [
             {
                 name: "Deep Work Session",
@@ -515,7 +507,7 @@
                 startTime: "08:00",
                 endTime: "09:30",
                 color: "red",
-                description: "Fitness, strength training, workout session & health routine."
+                description: "Fitness, strength workout & health routine."
             },
             {
                 name: "Trading & Market Analysis",
@@ -558,7 +550,6 @@
             document.getElementById('inputColor').value = r.color.toLowerCase();
             document.getElementById('inputDesc').value = r.description || "";
 
-            // Check checkboxes
             document.querySelectorAll('#daysCheckboxes input').forEach(cb => {
                 cb.checked = r.days.includes(cb.value);
             });
